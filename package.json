@@ -1,0 +1,20 @@
+{
+  "name": "haxball-bot-fva",
+  "version": "1.0.0",
+  "description": "Bot Haxball Headless adaptado para servidor Node.js puro",
+  "main": "host.js",
+  "scripts": {
+    "start": "node host.js"
+  },
+  "dependencies": {
+    "haxball-headless-api": "^0.2.2"
+  },
+  "keywords": [
+    "haxball",
+    "headless",
+    "bot",
+    "nodejs"
+  ],
+  "author": "",
+  "license": "ISC"
+}
