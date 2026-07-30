@@ -301,29 +301,17 @@ const MensajeDeBienvenida = [
   ░█▀▀▀ ░█──░█ ░█▀▀█ 
   ░█▀▀▀ ─░█░█─ ░█▄▄█ 
   ░█─── ──▀▄▀─ ░█─░█`, 
-
   `🏆 ¡Bienvenido/a a #FVA! 🏆`,  
-
   `⚽ MODALIDAD: x1 | GANA SIGUE`,  
-
   `👑 DUEÑOS: 112 y ryoga kida`,  
-
   `🌐 Únete a nuestra comunidad en Discord:`,  
-
-  🔗https://discord.gg/9mbxwBG4b
-
+  `🔗https://discord.gg/9mbxwBG4b`,
   `📋 REGLAS: Respetar el Gana Sigue, no lagg y cero bardo.`,  
-
   `🛠️ ¿Necesitás Admin? Usá la clave autorizada.`,  
-
   `📊 COMANDOS DE STATS:`,  
-
   `!me, !stats ID, !goleadores, !asistidores, !vallas-invictas, !mvp`,  
-
   `🔥 OTROS: !racha-actual, !viciosos, !ganadores, !presencias`,  
-
   `🍌 MEDÍ TU BANANA: !memide`,
-
   `🎭 AVATAR ANIMADOS: !avatar 😈,👿 | !avatar HO,LA | !avatar 🌑,🌒,🌓,🌔,🌕`
 ];
 
