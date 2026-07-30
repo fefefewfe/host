@@ -2,48 +2,54 @@
 // 🔌 POLYFILLS E INTEGRACIÓN AUTOCONTENIDA PARA NODE.JS PURO (PM2 / VPS)
 // ============================================================================
 
+// CRÍTICO: Declarar estas variables a nivel de módulo PRIMERO para evitar
+// ReferenceError en Node.js / PM2 / Linux VPS
+var localStorage, window, document, XMLHttpRequest, File;
+
 // 1. Entorno Global (window / document)
 if (typeof globalThis.window === 'undefined') {
   globalThis.window = globalThis;
 }
 if (typeof globalThis.document === 'undefined') {
   globalThis.document = {
-    createElement: () => ({}),
-    getElementsByTagName: () => [],
-    getElementById: () => null
+    createElement: function() { return {}; },
+    getElementsByTagName: function() { return []; },
+    getElementById: function() { return null; }
   };
 }
 
 // 2. Storage en memoria para sustituir localStorage en Node.js (Servidor / VPS)
-class MemoryStorage {
-  constructor() {
-    this._data = new Map();
-  }
-  getItem(key) {
-    const val = this._data.get(String(key));
-    return val !== undefined ? val : null;
-  }
-  setItem(key, value) {
-    this._data.set(String(key), String(value));
-  }
-  removeItem(key) {
-    this._data.delete(String(key));
-  }
-  clear() {
-    this._data.clear();
-  }
-  key(index) {
-    const keys = Array.from(this._data.keys());
-    return keys[index] || null;
-  }
-  get length() {
-    return this._data.size;
-  }
+function MemoryStorage() {
+  this._data = {};
 }
+MemoryStorage.prototype.getItem = function(key) {
+  var val = this._data[String(key)];
+  return val !== undefined ? val : null;
+};
+MemoryStorage.prototype.setItem = function(key, value) {
+  this._data[String(key)] = String(value);
+};
+MemoryStorage.prototype.removeItem = function(key) {
+  delete this._data[String(key)];
+};
+MemoryStorage.prototype.clear = function() {
+  this._data = {};
+};
+MemoryStorage.prototype.key = function(index) {
+  var keys = Object.keys(this._data);
+  return keys[index] || null;
+};
+Object.defineProperty(MemoryStorage.prototype, 'length', {
+  get: function() { return Object.keys(this._data).length; }
+});
 
-const _storageInstance = new MemoryStorage();
+var _storageInstance = new MemoryStorage();
 global.localStorage = _storageInstance;
 globalThis.localStorage = _storageInstance;
+localStorage = _storageInstance;
+window = globalThis.window;
+document = globalThis.document;
+
 
 // 3. Polyfill para XMLHttpRequest usando fetch nativo de Node.js (Node 18+)
 if (typeof globalThis.XMLHttpRequest === 'undefined') {
@@ -114,43 +120,19 @@ if (typeof globalThis.HBInit === 'undefined') {
 // ============================================================================
 
 function safeLocalStorageGet(key) {
-  try {
-    if (typeof localStorage !== 'undefined' && localStorage && typeof localStorage.getItem === 'function') {
-      return localStorage.getItem(key);
-    }
-    if (typeof globalThis.localStorage !== 'undefined' && globalThis.localStorage && typeof globalThis.localStorage.getItem === 'function') {
-      return globalThis.localStorage.getItem(key);
-    }
-  } catch (e) {}
-  return null;
+  try { return localStorage.getItem(key); } catch (e) { return null; }
 }
 function safeLocalStorageSet(key, value) {
-  try {
-    if (typeof localStorage !== 'undefined' && localStorage && typeof localStorage.setItem === 'function') {
-      localStorage.setItem(key, value);
-    } else if (typeof globalThis.localStorage !== 'undefined' && globalThis.localStorage) {
-      globalThis.localStorage.setItem(key, value);
-    }
-  } catch (e) {}
+  try { localStorage.setItem(key, value); } catch (e) {}
 }
 function safeLocalStorageRemove(key) {
-  try {
-    if (typeof localStorage !== 'undefined' && localStorage && typeof localStorage.removeItem === 'function') {
-      localStorage.removeItem(key);
-    } else if (typeof globalThis.localStorage !== 'undefined' && globalThis.localStorage) {
-      globalThis.localStorage.removeItem(key);
-    }
-  } catch (e) {}
+  try { localStorage.removeItem(key); } catch (e) {}
 }
 
-var window = globalThis.window;
-var document = globalThis.document;
-var localStorage = globalThis.localStorage;
-var XMLHttpRequest = globalThis.XMLHttpRequest;
-var File = globalThis.File;
+// Asignar polyfills restantes
+XMLHttpRequest = globalThis.XMLHttpRequest;
+File = globalThis.File;
 
-
-// ▇▇▇▇▇▇▇▇▇ ⚙️ CARGA DE POLYFILLS DE NODE.JS ▇▇▇▇▇▇▇▇▇
 
 // ▇▇▇▇▇▇▇▇▇ ⚙️ CONFIGURACIÓN DEL HOST ▇▇▇▇▇▇▇▇▇
 
