@@ -113,6 +113,43 @@ if (typeof globalThis.HBInit === 'undefined') {
 // ⚽ CÓDIGO ORIGINAL DEL BOT Y CONFIGURACIÓN DEL HOST
 // ============================================================================
 
+function safeLocalStorageGet(key) {
+  try {
+    if (typeof localStorage !== 'undefined' && localStorage && typeof localStorage.getItem === 'function') {
+      return localStorage.getItem(key);
+    }
+    if (typeof globalThis.localStorage !== 'undefined' && globalThis.localStorage && typeof globalThis.localStorage.getItem === 'function') {
+      return globalThis.localStorage.getItem(key);
+    }
+  } catch (e) {}
+  return null;
+}
+function safeLocalStorageSet(key, value) {
+  try {
+    if (typeof localStorage !== 'undefined' && localStorage && typeof localStorage.setItem === 'function') {
+      localStorage.setItem(key, value);
+    } else if (typeof globalThis.localStorage !== 'undefined' && globalThis.localStorage) {
+      globalThis.localStorage.setItem(key, value);
+    }
+  } catch (e) {}
+}
+function safeLocalStorageRemove(key) {
+  try {
+    if (typeof localStorage !== 'undefined' && localStorage && typeof localStorage.removeItem === 'function') {
+      localStorage.removeItem(key);
+    } else if (typeof globalThis.localStorage !== 'undefined' && globalThis.localStorage) {
+      globalThis.localStorage.removeItem(key);
+    }
+  } catch (e) {}
+}
+
+var window = globalThis.window;
+var document = globalThis.document;
+var localStorage = globalThis.localStorage;
+var XMLHttpRequest = globalThis.XMLHttpRequest;
+var File = globalThis.File;
+
+
 // ▇▇▇▇▇▇▇▇▇ ⚙️ CARGA DE POLYFILLS DE NODE.JS ▇▇▇▇▇▇▇▇▇
 
 // ▇▇▇▇▇▇▇▇▇ ⚙️ CONFIGURACIÓN DEL HOST ▇▇▇▇▇▇▇▇▇
@@ -725,10 +762,10 @@ var cooldownActive = {}; // Objeto para rastrear el estado de cooldown de cada a
 //  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇  CONFIGURACIÓN AVANZADA 🚀 ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇
 
 // Define una variable global para llevar el seguimiento de los minutos jugados por cada jugador
-let playerMinutesPlayed = JSON.parse(localStorage.getItem('playerMinutesPlayed')) || {};
+let playerMinutesPlayed = JSON.parse(safeLocalStorageGet('playerMinutesPlayed')) || {};
 
 // Define una variable global para llevar el seguimiento del tiempo que un jugador ha estado siendo el arquero
-let playerGoalkeeperTime = JSON.parse(localStorage.getItem('playerGoalkeeperTime')) || {};
+let playerGoalkeeperTime = JSON.parse(safeLocalStorageGet('playerGoalkeeperTime')) || {};
 
 let jugadoresConEmojis = new Set();
 
