@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Cabezones 2026</title>
+  <meta name="description" content="Juego de cabezones con las 8 grandes ligas 2026, el Mundial 2026 y el Mundial de Clubes. Súper tiros, poderes, liga, copa y 2 jugadores.">
+  <meta name="theme-color" content="#0B1A33">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='30' r='24' fill='%23EFC39C'/%3E%3Cpath d='M9 26a23 23 0 0 1 46 0c-8-9-38-9-46 0z' fill='%23231812'/%3E%3Ccircle cx='38' cy='29' r='5' fill='%23fff'/%3E%3Ccircle cx='50' cy='29' r='5' fill='%23fff'/%3E%3Ccircle cx='40' cy='29' r='2.5' fill='%23111'/%3E%3Ccircle cx='52' cy='29' r='2.5' fill='%23111'/%3E%3Ccircle cx='52' cy='54' r='9' fill='%23fff' stroke='%23111' stroke-width='2'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Chango&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#jugar">Ir al juego</a>
+
+  <header class="barra">
+    <a class="logo" href="#inicio" aria-label="Cabezones 2026, inicio">CABEZONES<b>26</b></a>
+    <nav aria-label="Secciones">
+      <a href="#jugar">Jugar</a>
+      <a href="#ligas">Ligas</a>
+      <a href="#mundial">Mundial</a>
+      <a href="#como">Cómo jugar</a>
+      <a href="#vitrina">Vitrina</a>
+    </nav>
+    <button class="btn-icono" type="button" data-sonido aria-pressed="false" aria-label="Sonido">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path class="ondas" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path class="tacha" d="M16 9l6 6M22 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>Sonido</span>
+    </button>
+  </header>
+
+  <main>
+    <section class="heroe" id="inicio">
+      <div class="heroe-texto">
+        <p class="sobretitulo">Temporada 2026</p>
+        <h1>Cabezones <span>2026</span></h1>
+        <p class="heroe-bajada">Partidos de uno contra uno con cabezas gigantes. Están las 8 grandes ligas con los ascensos de este año, el Mundial 2026 con sus 12 grupos reales y un Mundial de Clubes. Hay súper tiros, poderes y gol de oro.</p>
+        <div class="heroe-botones">
+          <a class="btn btn-grande" href="#jugar" data-ir-juego>Jugar ahora</a>
+          <a class="btn btn-borde" href="#ligas">Ver las ligas</a>
+        </div>
+      </div>
+      <div class="heroe-cabezones" id="estrellas-heroe" aria-hidden="true"></div>
+    </section>
+
+    <section class="seccion seccion-juego" id="jugar" aria-label="Juego">
+      <div class="juego en-menu" id="juego" tabindex="-1">
+        <canvas id="lienzo" width="1280" height="720" aria-label="Cancha de Cabezones 2026"></canvas>
+        <div class="capa" id="capa"></div>
+
+        <div class="hud" id="hud" hidden>
+          <button type="button" data-h="pausa" aria-label="Pausa">❚❚</button>
+          <button type="button" data-h="full" aria-label="Pantalla completa">⛶</button>
+        </div>
+
+        <div class="tactil" id="tactil" hidden>
+          <div class="grupo-t izq">
+            <button type="button" data-j="0" data-t="izq" aria-label="Izquierda">◀</button>
+            <button type="button" data-j="0" data-t="der" aria-label="Derecha">▶</button>
+            <span class="solo-dos">
+              <button type="button" data-j="0" data-t="saltar" aria-label="Saltar J1">▲</button>
+              <button type="button" data-j="0" data-t="patear" aria-label="Patear J1">●</button>
+              <button type="button" data-j="0" data-t="super" aria-label="Súper J1">★</button>
+            </span>
+          </div>
+          <div class="grupo-t der">
+            <span class="solo-uno">
+              <button type="button" data-j="0" data-t="super" class="t-super" aria-label="Súper tiro">★</button>
+              <button type="button" data-j="0" data-t="saltar" aria-label="Saltar">▲</button>
+              <button type="button" data-j="0" data-t="patear" class="t-patear" aria-label="Patear">●</button>
+            </span>
+            <span class="solo-dos">
+              <button type="button" data-j="1" data-t="izq" aria-label="Izquierda J2">◀</button>
+              <button type="button" data-j="1" data-t="der" aria-label="Derecha J2">▶</button>
+              <button type="button" data-j="1" data-t="saltar" aria-label="Saltar J2">▲</button>
+              <button type="button" data-j="1" data-t="patear" aria-label="Patear J2">●</button>
+              <button type="button" data-j="1" data-t="super" aria-label="Súper J2">★</button>
+            </span>
+          </div>
+        </div>
+
+        <p class="girar" aria-hidden="true">Girá el teléfono para jugar más cómodo</p>
+      </div>
+      <div class="bajo-juego">
+        <p><kbd>←</kbd><kbd>→</kbd> o <kbd>A</kbd><kbd>D</kbd> moverse · <kbd>↑</kbd>/<kbd>W</kbd> saltar · <kbd>Espacio</kbd> patear · <kbd>↓</kbd>/<kbd>S</kbd> súper tiro · <kbd>P</kbd> pausa</p>
+        <button class="btn btn-chico btn-borde" type="button" data-full>Pantalla completa</button>
+      </div>
+    </section>
+
+    <section class="seccion" id="ligas">
+      <header class="seccion-cabecera">
+        <p class="sobretitulo">Planteles 2026</p>
+        <h2>Las 8 ligas</h2>
+        <p>Cada liga tiene los equipos de la temporada 2026, con los que subieron y sin los que bajaron. Elegí tu entrada y armá una liga completa de todos contra todos.</p>
+      </header>
+      <div class="lista-entradas" id="lista-ligas"></div>
+    </section>
+
+    <section class="seccion" id="mundial">
+      <header class="seccion-cabecera">
+        <p class="sobretitulo">Estados Unidos, México y Canadá</p>
+        <h2>Mundial 2026</h2>
+        <p>Las 48 selecciones en los 12 grupos del sorteo. Pasan los dos primeros de cada grupo y los 8 mejores terceros a los dieciseisavos. En las eliminatorias, si hay empate, se define con gol de oro.</p>
+        <div class="heroe-botones">
+          <button class="btn" type="button" data-jugar-mundial>Jugar el Mundial</button>
+          <button class="btn btn-borde" type="button" data-jugar-clubes>Jugar el Mundial de Clubes</button>
+        </div>
+      </header>
+      <div class="grupos" id="lista-grupos"></div>
+    </section>
+
+    <section class="seccion" id="como">
+      <header class="seccion-cabecera">
+        <p class="sobretitulo">Reglamento</p>
+        <h2>Cómo se juega</h2>
+      </header>
+      <div class="como">
+        <article class="tarjeta">
+          <h3>Un jugador</h3>
+          <dl class="teclas">
+            <dt><kbd>←</kbd><kbd>→</kbd> / <kbd>A</kbd><kbd>D</kbd></dt><dd>Moverse</dd>
+            <dt><kbd>↑</kbd> / <kbd>W</kbd></dt><dd>Saltar y cabecear</dd>
+            <dt><kbd>Espacio</kbd></dt><dd>Patear</dd>
+            <dt><kbd>↓</kbd> / <kbd>S</kbd></dt><dd>Súper tiro, con la barra llena</dd>
+            <dt><kbd>P</kbd> / <kbd>Esc</kbd></dt><dd>Pausa</dd>
+          </dl>
+        </article>
+        <article class="tarjeta">
+          <h3>Dos jugadores</h3>
+          <dl class="teclas">
+            <dt>Jugador 1</dt><dd><kbd>A</kbd><kbd>D</kbd> moverse, <kbd>W</kbd> saltar, <kbd>Espacio</kbd> patear, <kbd>S</kbd> súper</dd>
+            <dt>Jugador 2</dt><dd><kbd>←</kbd><kbd>→</kbd> moverse, <kbd>↑</kbd> saltar, <kbd>Enter</kbd> o <kbd>Shift</kbd> derecho patear, <kbd>↓</kbd> súper</dd>
+          </dl>
+          <p>En el celular aparecen botones en pantalla. Con el teléfono acostado y en pantalla completa se juega mejor.</p>
+        </article>
+        <article class="tarjeta">
+          <h3>Súper tiros</h3>
+          <p>La barra de súper se llena con el tiempo y cada vez que tocás la pelota. Cuando está llena, apretá súper cerca de la pelota. Cada equipo tiene el suyo. Si el arquero patea justo a tiempo, lo frena.</p>
+          <ul class="supers">
+            <li class="s-fuego"><b>Fuego</b>Va derecho y muy rápido, y empuja al arquero para atrás.</li>
+            <li class="s-hielo"><b>Hielo</b>Si le pega al rival, lo deja congelado.</li>
+            <li class="s-rayo"><b>Rayo</b>Viaja en zigzag y aturde al que toca.</li>
+            <li class="s-tornado"><b>Tornado</b>Sube, cae con efecto y atraviesa al rival.</li>
+          </ul>
+        </article>
+        <article class="tarjeta">
+          <h3>Poderes</h3>
+          <p>Aparecen burbujas en el aire. Si la pelota las toca, el poder es para el último que la tocó.</p>
+          <ul class="poderes">
+            <li><i style="--c:#FFB703">XL</i><b>Cabezón</b> Cabeza gigante por 8 segundos.</li>
+            <li><i style="--c:#E63946">XS</i><b>Rival mini</b> Al rival se le achica la cabeza.</li>
+            <li><i style="--c:#2B9348">»</i><b>Turbo</b> Más velocidad y más salto.</li>
+            <li><i style="--c:#7FD8FF">❄</i><b>Congelar</b> El rival queda duro un rato.</li>
+            <li><i style="--c:#FF7A00">★</i><b>Súper lleno</b> La barra de súper se llena de golpe.</li>
+          </ul>
+        </article>
+        <article class="tarjeta">
+          <h3>Modos</h3>
+          <ul class="modos-lista">
+            <li><b>Partido rápido</b>Cualquier equipo contra cualquiera, incluso selecciones contra clubes.</li>
+            <li><b>Liga</b>Todos contra todos, con tabla y los resultados de las demás fechas.</li>
+            <li><b>Copa</b>16 equipos de una liga, a eliminación directa.</li>
+            <li><b>Mundial 2026</b>Fase de grupos y eliminatorias, desde dieciseisavos hasta la final.</li>
+            <li><b>Mundial de Clubes</b>Los 4 mejores de cada liga: 8 grupos y después octavos.</li>
+          </ul>
+          <p>El progreso del torneo se guarda en este navegador.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="seccion" id="vitrina">
+      <header class="seccion-cabecera">
+        <p class="sobretitulo">Tus títulos</p>
+        <h2>Vitrina</h2>
+      </header>
+      <div class="vitrina" id="lista-vitrina"></div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <p><b>Cabezones 2026</b> es un juego de fans hecho en HTML, sin archivos externos más allá de las tipografías. Los nombres de los equipos se usan solo para identificarlos; no hay escudos oficiales.</p>
+    <p>Planteles revisados con Wikipedia, Eurosport, CNN Brasil y CNN en Español (ascensos y descensos 2026) y el sorteo oficial del Mundial 2026.</p>
+  </footer>
+
+  <script src="js/datos.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/motor.js"></script>
+  <script src="js/dibujo.js"></script>
+  <script src="js/competiciones.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
