@@ -202,8 +202,8 @@ kbd {
 .continuar em { font-style: normal; font-size: 13px; opacity: 0.9; }
 .continuar i { font-style: normal; font-size: 20px; }
 .modos {
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;
-  width: min(760px, 100%); margin: 8px auto 14px;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;
+  width: min(900px, 100%); margin: 8px auto 14px;
 }
 .modo {
   display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left;
@@ -437,6 +437,14 @@ kbd {
 .grupo li { padding: 4px 0; border-top: 1px solid var(--linea); display: flex; align-items: center; font-weight: 600; }
 .grupo li:first-child { border-top: 0; }
 
+/* ---------- Copas ---------- */
+.lista-copas { display: grid; gap: 28px; }
+.copa-bloque { display: grid; grid-template-columns: minmax(300px, 380px) 1fr; gap: 14px; align-items: start; }
+.grupos-copa { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+.grupos-copa .grupo { padding: 10px 14px; }
+.grupos-copa .grupo h3 { font-size: 16px; }
+.grupos-copa .grupo li { font-size: 14px; }
+
 /* ---------- Cómo jugar ---------- */
 .como { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
 .tarjeta { background: var(--panel); border-radius: var(--radio); padding: 18px 20px; border: 1px solid var(--linea); }
@@ -476,6 +484,8 @@ kbd {
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .heroe { grid-template-columns: 1fr; padding-top: 32px; }
+  .modos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .copa-bloque { grid-template-columns: 1fr; }
   .hub { grid-template-columns: 1fr; }
   .juego.en-menu { aspect-ratio: auto; min-height: 620px; }
   .barra nav { display: none; }

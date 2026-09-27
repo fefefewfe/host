@@ -655,11 +655,11 @@
     }
   }
 
-  function dibujarPierna(g, hx, hy, ang, largo, kit, botin) {
+  function dibujarPierna(g, hx, hy, ang, largo, kit, botin, ancho) {
     const fx = hx + Math.sin(ang) * largo;
     const fy = hy + Math.cos(ang) * largo;
     g.strokeStyle = kit.medias;
-    g.lineWidth = 9;
+    g.lineWidth = ancho || 9;
     g.lineCap = 'round';
     g.beginPath();
     g.moveTo(hx, hy);
@@ -671,7 +671,7 @@
     g.rotate(ang * 0.6);
     g.fillStyle = botin;
     g.beginPath();
-    g.ellipse(4, 1, 10, 6, 0, 0, TAU);
+    g.ellipse(5, 1, ancho ? 13 : 10, ancho ? 7 : 6, 0, 0, TAU);
     g.fill();
     g.fillStyle = 'rgba(255,255,255,0.35)';
     g.fillRect(-2, -2, 7, 2);
@@ -697,21 +697,16 @@
     const hipY = -K.CADERA_Y;
     const botin = eq.aspecto.botin;
 
-    // Pierna de apoyo
-    dibujarPierna(g, -3, hipY, -camina * 0.5 - (p.enSuelo === false ? 0.35 : 0.05), K.PIERNA, kit, botin);
-    // Brazo trasero
-    const brazo = Math.sin(paso) * 0.6 + (p.festejo ? Math.sin(t * 14) * 0.8 - 1.8 : 0);
-    g.strokeStyle = sombrear(eq.aspecto.piel, -0.15);
-    g.lineWidth = 7;
-    g.lineCap = 'round';
-    g.beginPath();
-    g.moveTo(-12, -50);
-    g.lineTo(-12 - Math.sin(brazo) * 14, -50 + Math.cos(brazo) * 14);
-    g.stroke();
+    // Una sola pierna, como en Football Heads: al caminar el cuerpo va a saltitos
+    const salto = p.enSuelo === false ? 0 : Math.abs(camina) * 5;
+    const ang = p.patada > 0 ? p.pata : 0.1 + camina * 0.35 + (p.enSuelo === false ? 0.45 : 0);
+    dibujarPierna(g, 3, hipY - salto * 0.3, ang, K.PIERNA + salto * 0.3, kit, botin, 11);
 
+    g.save();
+    g.translate(0, -salto);
     // Short
     g.fillStyle = kit.pantalon;
-    rrect(g, -14, -38, 28, 14, 4);
+    rrect(g, -14, -38, 28, 14, 5);
     g.fill();
 
     // Torso con diseño
@@ -732,18 +727,6 @@
       g.fillRect(-19, -58, 6, 9);
       g.fillRect(13, -58, 6, 9);
     }
-
-    // Pierna de patada (adelante)
-    const ang = p.patada > 0 ? p.pata : 0.15 + camina * 0.5 + (p.enSuelo === false ? 0.4 : 0);
-    dibujarPierna(g, 4, hipY, ang, K.PIERNA, kit, botin);
-
-    // Brazo delantero
-    g.strokeStyle = eq.aspecto.piel;
-    g.lineWidth = 7;
-    g.beginPath();
-    g.moveTo(12, -50);
-    g.lineTo(12 + Math.sin(-brazo) * 14 * (p.festejo ? -1 : 1), -50 + Math.cos(brazo) * 14 * (p.festejo ? -1 : 1));
-    g.stroke();
 
     // Cabeza
     g.save();
@@ -768,6 +751,7 @@
       esfuerzo: p.patada > 0 || p.enSuelo === false
     };
     dibujarCabeza(g, eq, r, estado);
+    g.restore();
     g.restore();
     g.restore();
 
@@ -980,7 +964,7 @@
     }
 
     // Barras de súper
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 2 && pt.conSuper; i++) {
       const p = pt.jugadores[i];
       const bw = 190;
       const bx = i === 0 ? cx - 202 : cx + 202 - bw;
@@ -1233,6 +1217,105 @@
     g.restore();
   }
 
+  function botella(g, bo) {
+    g.save();
+    g.translate(bo.x, bo.y);
+    g.rotate(bo.rot);
+    g.globalAlpha = Math.min(1, bo.vida * 2);
+    g.fillStyle = 'rgba(170,225,255,0.85)';
+    rrect(g, -5, -11, 10, 20, 3);
+    g.fill();
+    g.fillStyle = '#E63946';
+    g.fillRect(-3, -15, 6, 4);
+    g.fillStyle = 'rgba(255,255,255,0.7)';
+    g.fillRect(-3, -8, 2, 12);
+    g.restore();
+  }
+
+  // Lluvia, nieve y viento dibujados en función del tiempo (sin estado)
+  const AZAR = Array.from({ length: 600 }, () => Math.random());
+  function clima(g, pt, t) {
+    const c = pt.clima;
+    if (!c || !c.tipo) return;
+    const entrada = Math.min(1, c.t / 1.2, (c.dur - c.t) / 1.2);
+    if (entrada <= 0) return;
+    g.save();
+    g.globalAlpha = entrada;
+    if (c.tipo === 'lluvia') {
+      g.fillStyle = 'rgba(8,16,34,0.28)';
+      g.fillRect(0, 0, K.W, K.H);
+      g.strokeStyle = 'rgba(200,228,255,0.7)';
+      g.lineWidth = 2;
+      g.beginPath();
+      for (let i = 0; i < 220; i++) {
+        const vel = 800 + AZAR[i + 200] * 400;
+        const x = ((AZAR[i] * (K.W + 100) - t * 120) % (K.W + 100) + K.W + 100) % (K.W + 100) - 50;
+        const y = (AZAR[i + 300] * K.H + t * vel) % K.H;
+        g.moveTo(x, y);
+        g.lineTo(x - 6, y + 22);
+      }
+      g.stroke();
+      // charcos que brillan
+      g.fillStyle = 'rgba(190,220,255,0.18)';
+      for (let i = 0; i < 6; i++) {
+        g.beginPath();
+        g.ellipse(120 + i * 210, 668 + (i % 2) * 22, 60, 5, 0, 0, TAU);
+        g.fill();
+      }
+    } else if (c.tipo === 'nieve') {
+      g.fillStyle = 'rgba(230,240,255,0.10)';
+      g.fillRect(0, 0, K.W, K.H);
+      g.fillStyle = 'rgba(245,250,255,0.85)';
+      g.fillRect(0, K.SUELO - 2, K.W, 5 * entrada);
+      for (let i = 0; i < 150; i++) {
+        const x = ((AZAR[i] * (K.W + 40) + Math.sin(t * 1.3 + i) * 30 + t * 30) % (K.W + 40)) - 20;
+        const y = (AZAR[i + 300] * K.H + t * (60 + (i % 5) * 18)) % K.H;
+        g.beginPath();
+        g.arc(x, y, 1.5 + (i % 3), 0, TAU);
+        g.fill();
+      }
+    } else if (c.tipo === 'viento') {
+      const s = Math.sign(c.viento);
+      g.strokeStyle = 'rgba(243,246,239,0.35)';
+      g.lineWidth = 2;
+      g.beginPath();
+      for (let i = 0; i < 26; i++) {
+        const largo = 40 + (i % 4) * 25;
+        let x = (AZAR[i] * (K.W + 200) + t * (600 + AZAR[i + 100] * 300)) % (K.W + 200) - 100;
+        if (s < 0) x = K.W - x;
+        const y = 140 + AZAR[i + 300] * 460 + Math.sin(t * 3 + i) * 6;
+        g.moveTo(x, y);
+        g.lineTo(x - s * largo, y);
+      }
+      g.stroke();
+      // hojas
+      g.fillStyle = 'rgba(160,200,120,0.8)';
+      for (let i = 0; i < 10; i++) {
+        let x = (i * 331 + t * 520) % (K.W + 60) - 30;
+        if (s < 0) x = K.W - x;
+        const y = 200 + ((i * 123) % 380) + Math.sin(t * 5 + i) * 20;
+        g.save();
+        g.translate(x, y);
+        g.rotate(t * 6 + i);
+        g.beginPath();
+        g.ellipse(0, 0, 6, 3, 0, 0, TAU);
+        g.fill();
+        g.restore();
+      }
+      // indicador bajo el marcador
+      g.globalAlpha = 1;
+      g.fillStyle = 'rgba(6,14,31,0.85)';
+      rrect(g, K.W / 2 - 70, 96, 140, 26, 13);
+      g.fill();
+      g.fillStyle = '#DFF7FF';
+      g.font = '14px ' + FUENTE;
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.fillText(s > 0 ? 'VIENTO  ▶▶' : '◀◀  VIENTO', K.W / 2, 110);
+    }
+    g.restore();
+  }
+
   function partido(g, pt, t) {
     const est = estadioPara(pt);
     g.save();
@@ -1281,8 +1364,10 @@
     dibujarPelota(g, b, K.PELOTA_R);
 
     particulas(g, pt.particulas);
+    for (const bo of pt.botellas) botella(g, bo);
     arcoFrente(g, 1);
     arcoFrente(g, -1);
+    clima(g, pt, t);
     g.restore();
 
     if (pt.flash > 0) {

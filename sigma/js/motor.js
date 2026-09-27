@@ -24,9 +24,9 @@
   });
 
   const DIFICULTADES = (CZ.DIFICULTADES = {
-    facil: { nombre: 'Fácil', reac: 0.4, vel: 0.66, err: 70, salto: 0.3, patada: 0.35, super: 0.25, defensa: 0.2, sep: 35, avance: 9999 },
+    facil: { nombre: 'Fácil', reac: 0.4, vel: 0.6, err: 70, salto: 0.3, patada: 0.35, super: 0.25, defensa: 0.2, sep: 35, avance: 700 },
     normal: { nombre: 'Normal', reac: 0.2, vel: 0.8, err: 25, salto: 0.65, patada: 0.75, super: 0.7, defensa: 0.6, sep: 45, avance: 540 },
-    dificil: { nombre: 'Difícil', reac: 0.12, vel: 0.88, err: 12, salto: 0.85, patada: 0.9, super: 1, defensa: 0.85, sep: 48, avance: 400 },
+    dificil: { nombre: 'Difícil', reac: 0.12, vel: 0.88, err: 12, salto: 0.85, patada: 0.9, super: 1, defensa: 0.85, sep: 48, avance: 340 },
     leyenda: { nombre: 'Leyenda', reac: 0.07, vel: 0.93, err: 5, salto: 1, patada: 1, super: 1, defensa: 1, sep: 50, avance: 340 }
   });
 
@@ -140,6 +140,15 @@
     constructor(o) {
       this.equipos = [o.local, o.visita];
       this.demo = !!o.demo;
+      // Reglas opcionales (por defecto como Football Heads: sin súper ni poderes, con clima e hinchas)
+      this.conSuper = !!o.supers;
+      this.conPoderes = !!o.poderes;
+      this.conClima = o.clima !== false;
+      this.conHinchas = o.hinchas !== false;
+      this.clima = { tipo: null, t: 0, dur: 0, viento: 0 };
+      this.proxClima = rnd(9, 16);
+      this.botellas = [];
+      this.botellasPend = null;
       this.duracion = o.duracion || 60;
       this.oroPermitido = !!o.oro;
       this.reloj = this.duracion;
@@ -290,7 +299,9 @@
 
       this.fisicaJugadores(dt, ent, false);
       this.fisicaPelota(dt);
-      this.actualizarItems(dt);
+      if (this.conPoderes) this.actualizarItems(dt);
+      if (this.conClima) this.actualizarClima(dt);
+      this.actualizarBotellas(dt);
       this.actualizarEfectos(dt);
       this.revisarGol();
 
@@ -347,7 +358,7 @@
         if (p.aturdido > 0) p.aturdido = Math.max(0, p.aturdido - dt);
         if (p.armado > 0) p.armado = Math.max(0, p.armado - dt);
         if (p.giro > 0) p.giro = Math.max(0, p.giro - dt);
-        if (!quietos && this.estado !== 'gol') p.carga = Math.min(1, p.carga + dt * 0.03);
+        if (this.conSuper && !quietos && this.estado !== 'gol') p.carga = Math.min(1, p.carga + dt * 0.03);
 
         const bloqueado = p.congelado > 0 || p.aturdido > 0;
         let mov = 0;
@@ -355,8 +366,9 @@
           if (e.izq) mov -= 1;
           if (e.der) mov += 1;
         }
-        const vmax = velocidadJug(p);
-        const acel = p.enSuelo ? 16 : 7;
+        const clima = this.clima.tipo;
+        const vmax = velocidadJug(p) * (clima === 'nieve' ? 0.8 : 1);
+        const acel = p.enSuelo ? (clima === 'lluvia' ? 5 : clima === 'nieve' ? 9 : 16) : 7;
         if (p.congelado > 0) p.vx *= Math.max(0, 1 - dt * 12);
         else p.vx += (mov * vmax - p.vx) * Math.min(1, dt * acel);
         if (mov !== 0 && p.enSuelo) p.paso += dt * Math.abs(p.vx) * 0.045;
@@ -495,11 +507,11 @@
 
     tocar(p, b, carga) {
       b.ultimo = p;
-      p.carga = Math.min(1, p.carga + carga);
+      if (this.conSuper) p.carga = Math.min(1, p.carga + carga);
     }
 
     intentarSuper(p) {
-      if (p.carga < 1 || this.estado !== 'juego') return;
+      if (!this.conSuper || p.carga < 1 || this.estado !== 'juego') return;
       const b = this.pelota;
       const dx = b.x - p.x;
       const dy = b.y - (p.y - 50);
@@ -567,6 +579,7 @@
       } else {
         b.vy += K.G_PELOTA * dt;
         b.vx *= 1 - 0.08 * dt;
+        if (this.clima.tipo === 'viento') b.vx += this.clima.viento * dt;
       }
       b.x += b.vx * dt;
       b.y += b.vy * dt;
@@ -581,10 +594,10 @@
         b.y = K.SUELO - R;
         if (b.vy > 0) {
           if (b.vy > 220) sonar(this, 'rebote', b.vy / 1200);
-          b.vy = -b.vy * 0.68;
+          b.vy = -b.vy * (this.clima.tipo === 'lluvia' || this.clima.tipo === 'nieve' ? 0.52 : 0.68);
           if (Math.abs(b.vy) < 70) b.vy = 0;
         }
-        b.vx *= 1 - 1.6 * dt;
+        b.vx *= 1 - (this.clima.tipo === 'lluvia' ? 0.5 : this.clima.tipo === 'nieve' ? 3 : 1.6) * dt;
         if (b.super && b.super.tipo !== 'tornado') b.super = null;
         if (b.super && b.super.t > 0.3) b.super = null;
       }
@@ -726,6 +739,10 @@
       }
       const col = [autor.equipo.kit.c1, autor.equipo.kit.c2, '#FFB703', '#F3F6EF'];
       this.particula(b.x, b.y, 70, { color: col, vida: 1.6, tam: 7, vmin: 150, vmax: 620, vy: -250, g: 700, tipo: 'papel' });
+      // Hinchas enojados: si el que convierte queda ganando, le tiran botellas en el saque
+      if (this.conHinchas && this.goles[lado] > this.goles[1 - lado]) {
+        this.botellasPend = { objetivo: lado, n: 2 + Math.floor(Math.random() * 2), t: 0.6 };
+      }
       if (this.onGol) this.onGol(lado);
     }
 
@@ -763,6 +780,89 @@
       sonar(this, 'poder');
       this.particula(x, y, 22, { color: [cfg.color, '#FFFFFF'], vida: 0.6, tam: 6, vmin: 60, vmax: 300 });
       if (!this.demo) this.texto(cfg.nombre.toUpperCase(), { vida: 1.1, tam: 46, y: 190, color: cfg.color, x: p.x });
+    }
+
+    /* ---------- Clima ---------- */
+    actualizarClima(dt) {
+      const c = this.clima;
+      if (c.tipo) {
+        c.t += dt;
+        if (c.t > c.dur) {
+          c.tipo = null;
+          this.proxClima = rnd(12, 22);
+        }
+        return;
+      }
+      this.proxClima -= dt;
+      if (this.proxClima > 0) return;
+      const tipos = ['viento', 'lluvia', 'nieve'];
+      c.tipo = tipos[Math.floor(Math.random() * tipos.length)];
+      c.t = 0;
+      c.dur = rnd(9, 14);
+      c.viento = (Math.random() < 0.5 ? -1 : 1) * rnd(240, 380);
+      if (!this.demo) {
+        const txt = { viento: c.viento > 0 ? 'VIENTO ▶▶' : '◀◀ VIENTO', lluvia: '¡LLUVIA!', nieve: '¡NIEVE!' }[c.tipo];
+        this.texto(txt, { vida: 1.4, tam: 64, y: 200, color: '#DFF7FF' });
+      }
+    }
+
+    /* ---------- Botellas de los hinchas ---------- */
+    actualizarBotellas(dt) {
+      const pend = this.botellasPend;
+      if (pend && this.estado === 'juego') {
+        pend.t -= dt;
+        if (pend.t <= 0 && pend.n > 0) {
+          pend.n--;
+          pend.t = rnd(0.35, 0.7);
+          this.tirarBotella(this.jugadores[pend.objetivo]);
+          if (pend.n === 0) this.botellasPend = null;
+        }
+      }
+      for (let i = this.botellas.length - 1; i >= 0; i--) {
+        const bo = this.botellas[i];
+        bo.vida -= dt;
+        bo.vy += 1200 * dt;
+        bo.x += bo.vx * dt;
+        bo.y += bo.vy * dt;
+        bo.rot += bo.giro * dt;
+        if (bo.vida <= 0) { this.botellas.splice(i, 1); continue; }
+        if (!bo.activa) continue;
+        for (const p of this.jugadores) {
+          const hy = cabezaY(p);
+          const r = radioCabeza(p) + 10;
+          if ((bo.x - p.x) ** 2 + (bo.y - hy) ** 2 < r * r || Math.abs(bo.x - p.x) < 24 && bo.y > hy && bo.y < p.y) {
+            bo.activa = false;
+            bo.vx = -bo.vx * 0.3;
+            bo.vy = -300;
+            p.aturdido = Math.max(p.aturdido, 1.1);
+            p.enojo = 1;
+            sonar(this, 'cabeza');
+            this.particula(bo.x, bo.y, 8, { color: ['#BDE8FF', '#FFFFFF'], vida: 0.4, tam: 4 });
+            if (!this.demo) this.texto('¡BOTELLAZO!', { vida: 1, tam: 44, y: 200, color: '#F3F6EF', x: p.x });
+            break;
+          }
+        }
+        if (bo.y > K.SUELO - 6) {
+          bo.y = K.SUELO - 6;
+          bo.activa = false;
+          bo.vy = -Math.abs(bo.vy) * 0.35;
+          bo.vx *= 0.5;
+          bo.giro *= 0.5;
+        }
+      }
+    }
+
+    tirarBotella(p) {
+      const T = rnd(0.85, 1.1);
+      const desde = p.x + (Math.random() < 0.5 ? -1 : 1) * rnd(220, 420);
+      const x = clamp(desde, 20, K.W - 20);
+      const y = rnd(170, 260);
+      const tx = p.x + p.vx * T * 0.5;
+      const ty = cabezaY(p);
+      this.botellas.push({
+        x, y, vx: (tx - x) / T, vy: (ty - y - 0.5 * 1200 * T * T) / T,
+        rot: 0, giro: rnd(-14, 14), vida: 3, activa: true
+      });
     }
 
     actualizarEfectos(dt) {

@@ -11,7 +11,9 @@
     liga: 'Liga',
     copa: 'Copa',
     mundial: 'Mundial 2026',
-    clubes: 'Mundial de Clubes'
+    clubes: 'Mundial de Clubes',
+    champions: 'Champions League',
+    libertadores: 'Copa Libertadores'
   };
   const NOMBRES_RONDA = {
     32: 'Dieciseisavos de final',
@@ -157,6 +159,21 @@
       t.nombre = 'Mundial de Clubes 2026';
       t.grupos = sortearClubes(usuario);
       prepararGrupos(t);
+    } else if (tipo === 'champions') {
+      // Fase liga: 36 equipos en una sola tabla, 8 fechas contra rivales distintos
+      const comp = D.competicion('champions');
+      t.nombre = 'Champions League 2026-27';
+      t.equipos = comp.equipos.slice();
+      t.equipos.forEach((id) => (t.tabla[id] = filaVacia(id)));
+      t.fechas = fixture(barajar(t.equipos)).slice(0, 8);
+      t.fecha = 0;
+      t.fase = 'liga';
+    } else if (tipo === 'libertadores') {
+      const comp = D.competicion('libertadores');
+      t.nombre = 'Copa Libertadores 2026';
+      t.grupos = comp.grupos.map((g) => g.slice());
+      t.idaVuelta = true;
+      prepararGrupos(t);
     }
     return t;
   }
@@ -191,6 +208,47 @@
   }
 
   const CRUCES_GRUPO = [[[0, 1], [2, 3]], [[0, 2], [1, 3]], [[0, 3], [1, 2]]];
+  const fechasGrupo = (t) => (t.idaVuelta ? 6 : 3);
+  // En ida y vuelta, la segunda rueda invierte la localía
+  function crucesGrupo(t, f) {
+    const base = CRUCES_GRUPO[f % 3];
+    return f < 3 ? base : base.map(([a, b]) => [b, a]);
+  }
+  function nombreRonda(t, i) {
+    if (t.nombresRonda && t.nombresRonda[i]) return t.nombresRonda[i];
+    return NOMBRES_RONDA[t.rondas[i].length * 2] || 'Eliminatoria';
+  }
+
+  // Champions: 1.º a 8.º a octavos; 9.º a 24.º juegan el play-off; el resto queda afuera
+  function armarChampions(t) {
+    const orden = ordenar(t, t.equipos).map((f) => f.id);
+    t.top8 = orden.slice(0, 8);
+    const po = orden.slice(8, 24);
+    const pares = [];
+    for (let i = 0; i < 8; i++) pares.push(po[i], po[15 - i]);
+    t.rondas = [crearRonda(pares)];
+    t.nombresRonda = ['Play-off'];
+    t.ronda = 0;
+    t.fase = 'llaves';
+    if (pares.indexOf(t.usuario) < 0) {
+      if (t.top8.indexOf(t.usuario) < 0) t.eliminado = true;
+      for (const m of t.rondas[0]) jugarLlave(m, simular(m.a, m.b, true));
+      avanzarLlaves(t);
+    }
+  }
+  function siguientesIds(t, ronda) {
+    if (t.tipo === 'champions' && t.ronda === 0 && t.top8) {
+      // Octavos: 1.º contra el ganador del cruce 16-17, 2.º contra el del 15-18, ...
+      const gan = ronda.map((m) => m.gan);
+      const pares = [];
+      for (let i = 0; i < 8; i++) pares.push(t.top8[i], gan[7 - i]);
+      const orden = ordenSiembra(8);
+      const res = [];
+      for (const k of orden) res.push(pares[2 * k], pares[2 * k + 1]);
+      return res;
+    }
+    return ronda.map((m) => m.gan);
+  }
 
   /* ---------- Consultas ---------- */
   function grupoDe(t, id) {
@@ -205,7 +263,7 @@
       return {
         rival: par[0] === u ? par[1] : par[0],
         local: par[0] === u,
-        etiqueta: 'Fecha ' + (t.fecha + 1) + ' de ' + t.fechas.length,
+        etiqueta: (t.tipo === 'champions' ? 'Fase liga · ' : '') + 'Fecha ' + (t.fecha + 1) + ' de ' + t.fechas.length,
         eliminatoria: false
       };
     }
@@ -213,15 +271,15 @@
       const gi = grupoDe(t, u);
       const g = t.grupos[gi];
       const pos = g.indexOf(u);
-      const par = CRUCES_GRUPO[t.gfecha].find((p) => p[0] === pos || p[1] === pos);
+      const par = crucesGrupo(t, t.gfecha).find((p) => p[0] === pos || p[1] === pos);
       const rival = g[par[0] === pos ? par[1] : par[0]];
-      return { rival, local: par[0] === pos, etiqueta: 'Grupo ' + LETRAS[gi] + ' · Fecha ' + (t.gfecha + 1) + ' de 3', eliminatoria: false };
+      return { rival, local: par[0] === pos, etiqueta: 'Grupo ' + LETRAS[gi] + ' · Fecha ' + (t.gfecha + 1) + ' de ' + fechasGrupo(t), eliminatoria: false };
     }
     if (t.fase === 'llaves') {
       const ronda = t.rondas[t.ronda];
       const m = ronda.find((x) => x.a === u || x.b === u);
       if (!m) return null;
-      return { rival: m.a === u ? m.b : m.a, local: m.a === u, etiqueta: NOMBRES_RONDA[ronda.length * 2] || 'Eliminatoria', eliminatoria: true };
+      return { rival: m.a === u ? m.b : m.a, local: m.a === u, etiqueta: nombreRonda(t, t.ronda), eliminatoria: true };
     }
     return null;
   }
@@ -245,13 +303,16 @@
       }
       t.fecha++;
       if (t.fecha >= t.fechas.length) {
-        t.fase = 'fin';
-        t.campeon = ordenar(t, t.equipos)[0].id;
+        if (t.tipo === 'champions') armarChampions(t);
+        else {
+          t.fase = 'fin';
+          t.campeon = ordenar(t, t.equipos)[0].id;
+        }
       }
     } else if (t.fase === 'grupos') {
       t.ultimos = [];
       t.grupos.forEach((g) => {
-        for (const [i, j] of CRUCES_GRUPO[t.gfecha]) {
+        for (const [i, j] of crucesGrupo(t, t.gfecha)) {
           const a = g[i];
           const b = g[j];
           const r = a === res.a && b === res.b ? res : simular(a, b, false);
@@ -260,7 +321,7 @@
         }
       });
       t.gfecha++;
-      if (t.gfecha >= 3) armarLlaves(t);
+      if (t.gfecha >= fechasGrupo(t)) armarLlaves(t);
     } else if (t.fase === 'llaves') {
       const ronda = t.rondas[t.ronda];
       t.ultimos = [];
@@ -283,7 +344,7 @@
         t.campeon = ronda[0].gan;
         return;
       }
-      const sig = crearRonda(ronda.map((m) => m.gan));
+      const sig = crearRonda(siguientesIds(t, ronda));
       t.rondas.push(sig);
       t.ronda++;
       const sigue = sig.some((m) => m.a === t.usuario || m.b === t.usuario);
@@ -328,7 +389,7 @@
       // En orden de siembra: los pares consecutivos se cruzan en la ronda siguiente
       for (const k of ordenSiembra(16)) pares.push(A[k].f.id, rivales[k].f.id);
     } else {
-      // Mundial de Clubes: 1A-2B, 1B-2A, ...
+      // Mundial de Clubes y Libertadores: 1A-2B, 1B-2A, ...
       for (let i = 0; i < 8; i += 2) {
         pares.push(primeros[i].f.id, segundos[i + 1].f.id);
         pares.push(primeros[i + 1].f.id, segundos[i].f.id);
@@ -384,12 +445,13 @@
     if (!ultimo) return 'Eliminado';
     if (ultimo.etiqueta === 'Final') return 'Subcampeón';
     if (ultimo.etiqueta.indexOf('Grupo') === 0) return 'Eliminado en la fase de grupos';
+    if (ultimo.etiqueta.indexOf('Fase liga') === 0) return 'Eliminado en la fase liga';
     return 'Eliminado en ' + ultimo.etiqueta.toLowerCase();
   }
 
   CZ.comp = {
     TIPOS, LETRAS, NOMBRES_RONDA,
-    crear, proximo, registrar, ordenar, grupoDe, simular,
+    crear, proximo, registrar, ordenar, grupoDe, simular, nombreRonda,
     guardar, cargar, borrar, vitrina, sumarTrofeo, desenlace
   };
 })();

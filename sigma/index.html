@@ -20,6 +20,7 @@
     <nav aria-label="Secciones">
       <a href="#jugar">Jugar</a>
       <a href="#ligas">Ligas</a>
+      <a href="#copas">Copas</a>
       <a href="#mundial">Mundial</a>
       <a href="#como">Cómo jugar</a>
       <a href="#vitrina">Vitrina</a>
@@ -35,7 +36,7 @@
       <div class="heroe-texto">
         <p class="sobretitulo">Temporada 2026</p>
         <h1>Cabezones <span>2026</span></h1>
-        <p class="heroe-bajada">Partidos de uno contra uno con cabezas gigantes. Están las 8 grandes ligas con los ascensos de este año, el Mundial 2026 con sus 12 grupos reales y un Mundial de Clubes. Hay súper tiros, poderes y gol de oro.</p>
+        <p class="heroe-bajada">Partidos de uno contra uno con cabezones de una sola pierna, como en los clásicos Football Heads. Están las 8 grandes ligas con los ascensos de este año, la Champions 2026-27, la Libertadores 2026, el Mundial 2026 con sus 12 grupos reales y un Mundial de Clubes. Con viento, lluvia, nieve y hinchas que tiran botellas.</p>
         <div class="heroe-botones">
           <a class="btn btn-grande" href="#jugar" data-ir-juego>Jugar ahora</a>
           <a class="btn btn-borde" href="#ligas">Ver las ligas</a>
@@ -97,6 +98,15 @@
       <div class="lista-entradas" id="lista-ligas"></div>
     </section>
 
+    <section class="seccion" id="copas">
+      <header class="seccion-cabecera">
+        <p class="sobretitulo">Copas internacionales</p>
+        <h2>Champions y Libertadores</h2>
+        <p>La Champions 2026-27 con los 36 clubes de la fase liga: 8 fechas en una sola tabla, play-off del 9.º al 24.º y eliminatorias. La Libertadores 2026 con los 8 grupos del sorteo, ida y vuelta, y después octavos.</p>
+      </header>
+      <div class="lista-copas" id="lista-copas"></div>
+    </section>
+
     <section class="seccion" id="mundial">
       <header class="seccion-cabecera">
         <p class="sobretitulo">Estados Unidos, México y Canadá</p>
@@ -135,8 +145,19 @@
           <p>En el celular aparecen botones en pantalla. Con el teléfono acostado y en pantalla completa se juega mejor.</p>
         </article>
         <article class="tarjeta">
-          <h3>Súper tiros</h3>
-          <p>La barra de súper se llena con el tiempo y cada vez que tocás la pelota. Cuando está llena, apretá súper cerca de la pelota. Cada equipo tiene el suyo. Si el arquero patea justo a tiempo, lo frena.</p>
+          <h3>Clima e hinchas</h3>
+          <p>Como en Football Heads, de vez en cuando cambia el clima en pleno partido:</p>
+          <ul class="supers">
+            <li class="s-hielo"><b>Viento</b>Empuja la pelota hacia un lado. Mirá la flecha debajo del marcador.</li>
+            <li class="s-tornado"><b>Lluvia</b>La cancha resbala: cuesta frenar y la pelota corre más.</li>
+            <li class="s-rayo"><b>Nieve</b>Todos van más lentos y la pelota pica menos.</li>
+          </ul>
+          <p>Si hacés un gol y quedás ganando, los hinchas rivales te tiran botellas. Si te pegan, quedás aturdido un momento.</p>
+          <p>Todo esto se puede apagar en <b>Reglas</b>, en el menú del juego.</p>
+        </article>
+        <article class="tarjeta">
+          <h3>Súper tiros (opcional)</h3>
+          <p>Vienen apagados, como en Football Heads. Si los activás en <b>Reglas</b>, se llena una barra con el tiempo y cada vez que tocás la pelota. Con la barra llena, apretá súper cerca de la pelota. Cada equipo tiene el suyo, y si el arquero patea justo a tiempo, lo frena.</p>
           <ul class="supers">
             <li class="s-fuego"><b>Fuego</b>Va derecho y muy rápido, y empuja al arquero para atrás.</li>
             <li class="s-hielo"><b>Hielo</b>Si le pega al rival, lo deja congelado.</li>
@@ -145,8 +166,8 @@
           </ul>
         </article>
         <article class="tarjeta">
-          <h3>Poderes</h3>
-          <p>Aparecen burbujas en el aire. Si la pelota las toca, el poder es para el último que la tocó.</p>
+          <h3>Poderes (opcional)</h3>
+          <p>También vienen apagados. Si los activás, aparecen burbujas en el aire y, si la pelota toca una, el poder es para el último que la tocó.</p>
           <ul class="poderes">
             <li><i style="--c:#FFB703">XL</i><b>Cabezón</b> Cabeza gigante por 8 segundos.</li>
             <li><i style="--c:#E63946">XS</i><b>Rival mini</b> Al rival se le achica la cabeza.</li>
@@ -161,6 +182,8 @@
             <li><b>Partido rápido</b>Cualquier equipo contra cualquiera, incluso selecciones contra clubes.</li>
             <li><b>Liga</b>Todos contra todos, con tabla y los resultados de las demás fechas.</li>
             <li><b>Copa</b>16 equipos de una liga, a eliminación directa.</li>
+            <li><b>Champions League</b>Fase liga de 36, play-off, octavos y final.</li>
+            <li><b>Libertadores</b>Grupos ida y vuelta y después eliminatorias.</li>
             <li><b>Mundial 2026</b>Fase de grupos y eliminatorias, desde dieciseisavos hasta la final.</li>
             <li><b>Mundial de Clubes</b>Los 4 mejores de cada liga: 8 grupos y después octavos.</li>
           </ul>
