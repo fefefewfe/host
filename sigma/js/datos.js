@@ -300,6 +300,76 @@
     ]
   };
 
+  // Copas internacionales. Los equipos que ya están en una liga se referencian por id.
+  const CHAMPIONS = {
+    id: 'champions', nombre: 'Champions League', pais: 'Europa', temporada: '2026-27',
+    bandera: ['#0A1E5C', '#FFFFFF', '#0A1E5C'],
+    nota: 'Fase liga de 36 equipos. Debutan Sabah, LASK y Viking',
+    copa: true,
+    bombos: [
+      ['ligue1:PSG', 'bundesliga:FCB', 'laliga:RMA', 'premier:LIV', 'seriea:INT', 'premier:MCI', 'premier:ARS', 'laliga:BAR', 'laliga:ATM'],
+      ['bundesliga:BVB', 'seriea:ROM', 'champions:SCP', 'premier:AVL', 'champions:FCP', 'premier:MUN', 'champions:BRU', 'laliga:BET', 'champions:PSV'],
+      ['champions:FEY', 'ligue1:LIL', 'champions:BOD', 'seriea:NAP', 'bundesliga:RBL', 'laliga:VIL', 'champions:FEN', 'champions:SHA', 'champions:GAL'],
+      ['champions:SLA', 'champions:SLO', 'bundesliga:VFB', 'champions:AEK', 'champions:LSK', 'seriea:COM', 'ligue1:RCL', 'champions:VIK', 'champions:SAB']
+    ],
+    equipos: [
+      ['Sporting CP', 'SCP', 80, 'aros', '#008057', '#FFFFFF', '#111111'],
+      ['Porto', 'FCP', 80, 'bastones', '#0F4C9A', '#FFFFFF', '#FFFFFF'],
+      ['Club Brugge', 'BRU', 77, 'bastones', '#111111', '#1C5FAE', '#111111'],
+      ['PSV', 'PSV', 79, 'mitades', '#E30613', '#FFFFFF', '#111111'],
+      ['Feyenoord', 'FEY', 77, 'mitades', '#E30613', '#FFFFFF', '#111111'],
+      ['Bodø/Glimt', 'BOD', 75, 'liso', '#FFE000', '#111111', '#FFE000'],
+      ['Fenerbahçe', 'FEN', 78, 'bastones', '#FFED00', '#0A2A60', '#FFFFFF'],
+      ['Shakhtar Donetsk', 'SHA', 74, 'bastones', '#FF7A00', '#111111', '#111111'],
+      ['Galatasaray', 'GAL', 80, 'mitades', '#FDB912', '#A90432', '#FFFFFF'],
+      ['Slavia Praga', 'SLA', 73, 'mitades', '#FFFFFF', '#D7141A', '#FFFFFF'],
+      ['Slovan Bratislava', 'SLO', 68, 'liso', '#6CACE4', '#FFFFFF', '#FFFFFF'],
+      ['AEK Atenas', 'AEK', 73, 'liso', '#FFD700', '#111111', '#111111'],
+      ['LASK', 'LSK', 70, 'bastones', '#111111', '#FFFFFF', '#111111'],
+      ['Viking', 'VIK', 69, 'liso', '#0A2A60', '#FFFFFF', '#FFFFFF'],
+      ['Sabah', 'SAB', 67, 'liso', '#0A2A60', '#FFD700', '#0A2A60']
+    ]
+  };
+
+  const LIBERTADORES = {
+    id: 'libertadores', nombre: 'Copa Libertadores', pais: 'Sudamérica', temporada: '2026',
+    bandera: ['#1A1A1A', '#C9A227', '#1A1A1A'],
+    nota: 'Los 8 grupos del sorteo del 19 de marzo. La final es en Montevideo',
+    copa: true,
+    grupos: [
+      ['brasil:FLA', 'argentina:EDL', 'libertadores:DIM', 'libertadores:CUS'],
+      ['libertadores:NAC', 'libertadores:COQ', 'libertadores:DTO', 'libertadores:UNI'],
+      ['brasil:FLU', 'libertadores:BOL', 'libertadores:DLG', 'argentina:IRV'],
+      ['argentina:BOC', 'brasil:CRU', 'libertadores:UCA', 'libertadores:BSC'],
+      ['libertadores:PEN', 'brasil:COR', 'libertadores:SFE', 'argentina:PLA'],
+      ['brasil:PAL', 'libertadores:CER', 'libertadores:JUN', 'libertadores:SCR'],
+      ['libertadores:LDU', 'argentina:LAN', 'libertadores:ARE', 'brasil:MIR'],
+      ['libertadores:IDV', 'libertadores:LIB', 'argentina:CEN', 'libertadores:UCV']
+    ],
+    equipos: [
+      ['Independiente Medellín', 'DIM', 72, 'liso', '#E30613', '#0A2A60', '#0A2A60'],
+      ['Cusco FC', 'CUS', 66, 'liso', '#FFD700', '#111111', '#111111'],
+      ['Nacional', 'NAC', 75, 'liso', '#FFFFFF', '#0A2A60', '#0A2A60'],
+      ['Coquimbo Unido', 'COQ', 69, 'liso', '#FFD700', '#111111', '#111111'],
+      ['Deportes Tolima', 'DTO', 70, 'liso', '#9B1B30', '#FFD700', '#9B1B30'],
+      ['Universitario', 'UNI', 72, 'liso', '#F5E6C8', '#9B1B30', '#111111'],
+      ['Bolívar', 'BOL', 71, 'liso', '#6CACE4', '#FFFFFF', '#FFFFFF'],
+      ['Deportivo La Guaira', 'DLG', 66, 'liso', '#FF7A00', '#0A2A60', '#0A2A60'],
+      ['Universidad Católica', 'UCA', 72, 'franja', '#FFFFFF', '#0A3A8C', '#0A3A8C'],
+      ['Barcelona SC', 'BSC', 72, 'liso', '#FFD700', '#E30613', '#111111'],
+      ['Peñarol', 'PEN', 76, 'bastones', '#FFD700', '#111111', '#111111'],
+      ['Independiente Santa Fe', 'SFE', 71, 'mangas', '#E30613', '#FFFFFF', '#FFFFFF'],
+      ['Cerro Porteño', 'CER', 73, 'bastones', '#0A2A60', '#E30613', '#0A2A60'],
+      ['Junior', 'JUN', 72, 'bastones', '#E30613', '#FFFFFF', '#0A2A60'],
+      ['Sporting Cristal', 'SCR', 71, 'liso', '#6CACE4', '#FFFFFF', '#FFFFFF'],
+      ['Liga de Quito', 'LDU', 76, 'liso', '#FFFFFF', '#0A2A60', '#FFFFFF'],
+      ['Always Ready', 'ARE', 66, 'liso', '#FFFFFF', '#E30613', '#111111'],
+      ['Independiente del Valle', 'IDV', 76, 'bastones', '#111111', '#0A2A60', '#111111'],
+      ['Libertad', 'LIB', 72, 'bastones', '#111111', '#FFFFFF', '#111111'],
+      ['Universidad Central', 'UCV', 66, 'liso', '#FFFFFF', '#0A2A60', '#0A2A60']
+    ]
+  };
+
   /* ---------- Generación determinística de cada cabezón ---------- */
   function hash(str) {
     let h = 2166136261;
@@ -377,10 +447,22 @@
     });
     COMPETICIONES.push(comp);
   }
+  // Copas: primero los equipos propios, después la lista completa desde bombos o grupos
+  for (const copa of [CHAMPIONS, LIBERTADORES]) {
+    const comp = Object.assign({}, copa);
+    for (const f of copa.equipos) {
+      const eq = armarEquipo(f, copa.id);
+      EQUIPOS[eq.id] = eq;
+    }
+    comp.equipos = (copa.bombos || copa.grupos).flat();
+    for (const id of comp.equipos) if (!EQUIPOS[id]) throw new Error('Falta el equipo ' + id);
+    COMPETICIONES.push(comp);
+  }
 
   CZ.datos = {
     competiciones: COMPETICIONES,
-    ligas: COMPETICIONES.filter((c) => !c.selecciones),
+    ligas: COMPETICIONES.filter((c) => !c.selecciones && !c.copa),
+    copas: COMPETICIONES.filter((c) => c.copa),
     mundial: COMPETICIONES.find((c) => c.selecciones),
     equipos: EQUIPOS,
     equipo: (id) => EQUIPOS[id],

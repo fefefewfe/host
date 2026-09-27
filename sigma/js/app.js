@@ -8,7 +8,8 @@
 
   /* ---------- Opciones ---------- */
   const OPC = 'cz26_opciones';
-  const opciones = { dificultad: 'normal', duracion: 60 };
+  // Por defecto, reglas como Football Heads: clima e hinchas sí, súper tiros y poderes no
+  const opciones = { dificultad: 'normal', duracion: 60, clima: true, hinchas: true, supers: false, poderes: false };
   try { Object.assign(opciones, JSON.parse(localStorage.getItem(OPC) || '{}')); } catch (e) { /* nada */ }
   if (!CZ.DIFICULTADES[opciones.dificultad]) opciones.dificultad = 'normal';
   if ([45, 60, 90].indexOf(opciones.duracion) < 0) opciones.duracion = 60;
@@ -88,25 +89,32 @@
     const dif = Object.keys(CZ.DIFICULTADES).map((k) => [k, CZ.DIFICULTADES[k].nombre]);
     pantalla('inicio',
       '<div class="marca"><span class="marca-a">CABEZONES</span><span class="marca-b">2026</span></div>' +
-      '<p class="bajada">8 ligas con los planteles 2026 y el Mundial con sus 12 grupos reales</p>' +
+      '<p class="bajada">8 ligas 2026, Champions, Libertadores y el Mundial con sus grupos reales</p>' +
       cont +
       '<div class="modos">' +
       boton('rapido', 'Partido rápido', 'Vos contra la compu', 'verde') +
       boton('dos', '2 jugadores', 'Mismo teclado', 'verde') +
       boton('liga', 'Liga', 'Todos contra todos', 'azul') +
       boton('copa', 'Copa', '16 equipos, mata-mata', 'azul') +
+      boton('champions', 'Champions League', '36 clubes, 2026-27', 'oro') +
+      boton('libertadores', 'Libertadores', '32 clubes, 2026', 'oro') +
       boton('mundial', 'Mundial 2026', '48 selecciones', 'oro') +
       boton('clubes', 'Mundial de Clubes', '32 clubes de 8 ligas', 'oro') +
       '</div>' +
       '<div class="opciones">' +
       '<label>Dificultad</label>' + segmentado('dif', dif, opciones.dificultad) +
       '<label>Duración</label>' + segmentado('dur', [[45, '45 s'], [60, '60 s'], [90, '90 s']], opciones.duracion) +
+      '<label>Reglas</label><div class="seg" role="group" aria-label="Reglas">' +
+      [['clima', 'Clima'], ['hinchas', 'Hinchas'], ['supers', 'Súper tiros'], ['poderes', 'Poderes']].map(([k, n]) =>
+        '<button data-a="regla" data-v="' + k + '" class="' + (opciones[k] ? 'activo' : '') + '" aria-pressed="' + !!opciones[k] + '">' + n + '</button>'
+      ).join('') + '</div>' +
       '</div>',
       {
         continuar: () => (C.proximo(torneo) ? pHub() : pFin()),
         modo: (v) => elegirModo(v),
         dif: (v) => { opciones.dificultad = v; guardarOpciones(); pInicio(); },
-        dur: (v) => { opciones.duracion = Number(v); guardarOpciones(); pInicio(); }
+        dur: (v) => { opciones.duracion = Number(v); guardarOpciones(); pInicio(); },
+        regla: (v) => { opciones[v] = !opciones[v]; guardarOpciones(); pInicio(); }
       });
   }
   function boton(v, t, s, c) {
@@ -128,11 +136,16 @@
       pLigas(m);
     } else if (m === 'mundial') {
       pEquipos({ titulo: 'Mundial 2026: elegí tu selección', comps: [D.mundial.id], onElegir: (id) => nuevoTorneo('mundial', D.mundial.id, id), onVolver: pInicio, grupos: true });
+    } else if (m === 'champions' || m === 'libertadores') {
+      const c = D.competicion(m);
+      pEquipos({ titulo: c.nombre + ' ' + c.temporada + ': elegí tu club', comps: [m], onElegir: (id) => nuevoTorneo(m, m, id), onVolver: pInicio, grupos: true });
     } else if (m === 'clubes') {
       pEquipos({ titulo: 'Mundial de Clubes: elegí tu club', comps: D.ligas.map((l) => l.id), onElegir: (id) => nuevoTorneo('clubes', null, id), onVolver: pInicio });
     }
   }
   const todas = () => D.competiciones.map((c) => c.id);
+  // En el Mundial los grupos traen códigos; en las copas, ids completos
+  const idDe = (c, cod) => (cod.indexOf(':') >= 0 ? cod : c.id + ':' + cod);
 
   /* ---------- Entradas de estadio (ligas) ---------- */
   function entrada(comp, i, accion) {
@@ -174,9 +187,10 @@
       : '';
     let lista = c.equipos.filter((id) => id !== o.excluir);
     let cuerpo;
-    if (o.grupos && c.grupos) {
-      cuerpo = '<div class="grupos-eleccion">' + c.grupos.map((g, gi) =>
-        '<div class="grupo-col"><h4>Grupo ' + C.LETRAS[gi] + '</h4>' + g.map((cod) => ficha(c.id + ':' + cod)).join('') + '</div>'
+    if (o.grupos && (c.grupos || c.bombos)) {
+      const cols = c.grupos || c.bombos;
+      cuerpo = '<div class="grupos-eleccion">' + cols.map((g, gi) =>
+        '<div class="grupo-col"><h4>' + (c.grupos ? 'Grupo ' + C.LETRAS[gi] : 'Bombo ' + (gi + 1)) + '</h4>' + g.map((cod) => ficha(idDe(c, cod))).join('') + '</div>'
       ).join('') + '</div>';
     } else {
       lista = lista.slice().sort((a, b) => eq(b).nivel - eq(a).nivel);
@@ -261,6 +275,10 @@
       const n = t.equipos.length;
       return tabla(t.equipos, (i) => (i === 0 ? 'z-campeon' : i < 4 ? 'z-arriba' : i >= n - 3 ? 'z-abajo' : ''));
     }
+    if (t.tipo === 'champions') {
+      return '<p class="nota">Del 1.º al 8.º van directo a octavos; del 9.º al 24.º juegan el play-off.</p>' +
+        tabla(t.equipos, (i) => (i < 8 ? 'z-arriba' : i < 24 ? 'z-medio' : 'z-abajo'));
+    }
     if (t.grupos) {
       const mio = C.grupoDe(t, t.usuario);
       const orden = [mio].concat(t.grupos.map((_, i) => i).filter((i) => i !== mio));
@@ -280,6 +298,7 @@
     const rv = eq(px.rival);
     const vistas = [];
     if (t.tipo === 'liga') vistas.push(['tabla', 'Tabla']);
+    if (t.tipo === 'champions') vistas.push(['tabla', 'Fase liga']);
     if (t.grupos) vistas.push(['tabla', 'Grupos']);
     if (t.rondas) vistas.push(['llaves', 'Llaves']);
     vistas.push(['resultados', 'Última fecha']);
@@ -400,6 +419,7 @@
     partido = new CZ.Partido({
       local: eq(o.local), visita: eq(o.visita),
       control: o.control, dificultad: o.dificultad, duracion: o.duracion, oro: o.oro,
+      clima: opciones.clima, hinchas: opciones.hinchas, supers: opciones.supers, poderes: opciones.poderes,
       onFin: (res) => { if (modo === 'partido' || modo === 'pausa') pResultado(res); }
     });
     capa.hidden = true;
@@ -571,7 +591,7 @@
     const liga = D.ligas[Math.floor(Math.random() * D.ligas.length)];
     const ids = liga.equipos.slice().sort(() => Math.random() - 0.5);
     demo = new CZ.Partido({
-      local: eq(ids[0]), visita: eq(ids[1]), control: ['cpu', 'cpu'], dificultad: 'dificil', duracion: 45, demo: true,
+      local: eq(ids[0]), visita: eq(ids[1]), control: ['cpu', 'cpu'], dificultad: 'dificil', duracion: 45, demo: true, hinchas: false,
       onFin: () => setTimeout(nuevaDemo, 2500)
     });
   }
@@ -631,8 +651,28 @@
       g.map((cod) => { const e = eq(m.id + ':' + cod); return '<li><i class="camiseta" style="--c1:' + e.kit.c1 + ';--c2:' + e.kit.c2 + '"></i>' + esc(e.nombre) + '</li>'; }).join('') +
       '</ul></div>'
     ).join('');
+    renderCopas();
     document.querySelectorAll('[data-jugar-mundial]').forEach((b) => b.addEventListener('click', () => { irAlJuego(); elegirModo('mundial'); }));
     document.querySelectorAll('[data-jugar-clubes]').forEach((b) => b.addEventListener('click', () => { irAlJuego(); elegirModo('clubes'); }));
+  }
+
+  function renderCopas() {
+    const cont = $('#lista-copas');
+    if (!cont) return;
+    cont.innerHTML = D.copas.map((c, i) => {
+      const cols = c.grupos || c.bombos;
+      return '<div class="copa-bloque">' + entrada(c, 8 + i, 'data-jugar-copa="' + c.id + '"') +
+        '<div class="grupos grupos-copa">' + cols.map((g, gi) =>
+          '<div class="grupo"><h3>' + (c.grupos ? 'Grupo ' + C.LETRAS[gi] : 'Bombo ' + (gi + 1)) + '</h3><ul>' +
+          g.map((id) => { const e = eq(id); return '<li><i class="camiseta" style="--c1:' + e.kit.c1 + ';--c2:' + e.kit.c2 + '"></i>' + esc(e.nombre) + '</li>'; }).join('') +
+          '</ul></div>').join('') + '</div></div>';
+    }).join('');
+    cont.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-jugar-copa]');
+      if (!b) return;
+      irAlJuego();
+      elegirModo(b.dataset.jugarCopa);
+    });
   }
 
   function renderVitrina() {
